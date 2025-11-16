@@ -1,71 +1,22 @@
+%% script_demo_Greedy
+% main demo file for the Greedy path planner
 
 %% Introduction to and Purpose of the Code
 % This is the explanation of the code that can be found by running
-%       script_demo_Laps.m
-% This is a script to demonstrate the functions within the Laps code
+%       script_demo_Greedy.m
+% This is a script to demonstrate the functions within the Greedy code
 % library. This code repo is typically located at:
-%   https://github.com/ivsg-psu/FeatureExtraction_DataClean_BreakDataIntoLaps
+%   https://github.com/ivsg-psu/PathPlanning_GridFreePathPlanners_Greedy
 %
 % If you have questions or comments, please contact Sean Brennan at
 % sbrennan@psu.edu
 %
-% The purpose of the code is to break data into "laps", namely portions of
-% data defined by start and end points, and in some cases, even allowing
-% excursion points that must be "hit" between start and end points. The
-% reason for this code is that it is very common that data collection in
-% the field passes repeatedly over a test area, even in one data set, and
-% thus one must be able to quickly break the code into individual data
-% groups with one grouping, or "lap", per traversal.
+% The purpose of the code is to demonstrate an implementation of the Greedy
+% path planner
 
 % Revision history:
-% 2022_03_27 - Sean Brennan
-% -  created a demo script of core debug utilities
-% 2022_04_02 - Sean Brennan
-% -  Added sample path creation
-% 2022_04_04 - Sean Brennan
-% -  Added minor edits
-% 2022_04_10 - Sean Brennan
-% -  Added comments, plotting utilities for zone definitions
-% 2022_05_21 - Sean Brennan
-% -  More cleanup
-% 2022_07_23 - Sean Brennan
-% -  Enable index-based look-up
-% 2023_02_01 - Sean Brennan
-% -  Enable web-based installs
-% 2025_04_25 - Sean Brennan
-% -  Updated header structure to enable global flagging from main script
-% -  Added global flags for setting test conditions and plotting in fcns
-% -  Updated DebugTools_v2024_12_18 dependency
-% -  Updated PathClass_v2024_03_14 dependency
-% -  Updated GetUserInputPath_v2025_04_27 dependency
-% -  Added PlotRoad_v2025_04_12 dependency
-% -  Updated headers in all functions
-% -  Added no-plot and fast-mode tests in all test scripts
-% -  Added global test script
-% 2025_07_02 - Sean Brennan
-% -  Updated PathClass_v2025_07_02 dependency
-% 2025_07_04 - Sean Brennan
-% -  Cleaned up plotting and assertion testing throughout
-% (new release)
-%
-% 2025_11_12 - Sean Brennan, sbrennan@psu.edu
-% -  Updated installer to use fcn_DebugTools_autoInstallRepos
-% -  Updated script_test_all_functions to current release from DebugTools
-% -  Cleared out clc / clear all commands in scripts and functions:
-%    % * script_test_fcn_Laps_breakDataIntoLapIndices
-%    % * script_test_fcn_Laps_breakDataIntoLaps
-%    % * script_test_fcn_Laps_findPointZoneStartStopAndMinimum
-%    % * script_test_fcn_Laps_findSegmentZoneStartStop
-% -  Fixed missing "warning('backtrace','on');" in several files
-% -  Fixed extra "figure(fig_num);" that was in Input section of all fcns
-% -  Cleaned up README.md a bit including lint, simplification of commands.
-% (new release)
-%
-% 2025_11_13 - S. Brennan
-% - updated script_test_all_functions
-% - updated header flags for clearing path, to do fast checking without
-%   % skipping
-% (new release)
+% 2025_11_15 - Sean Brennan
+% -  created this demo script of core functions
 
 % TO-DO:
 % -  2025_11_12 by Sean Brennan, sbrennan@psu.edu
@@ -85,10 +36,13 @@ cd(filepath);
 
 %% Clear paths and folders, if needed
 if 1==1
-    clear flag_Laps_Folders_Initialized
+    clear flag_Greedy_Folders_Initialized
 end
 if 1==0
     fcn_INTERNAL_clearUtilitiesFromPathAndFolders;
+end
+if 1==0
+    restoredefaultpath
 end
 
 %% Install dependencies
@@ -97,6 +51,14 @@ end
 % automatically, first, even if not listed:
 clear dependencyURLs dependencySubfolders
 ith_repo = 0;
+
+ith_repo = ith_repo+1;
+dependencyURLs{ith_repo} = 'https://github.com/ivsg-psu/PathPlanning_MapTools_MapGenClassLibrary';
+dependencySubfolders{ith_repo} = {'Functions','testFixtures','GridMapGen'};
+
+ith_repo = ith_repo+1;
+dependencyURLs{ith_repo} = 'https://github.com/ivsg-psu/PathPlanning_GridFreePathPlanners_VGraph';
+dependencySubfolders{ith_repo} = {'Functions','Data'};
 
 ith_repo = ith_repo+1;
 dependencyURLs{ith_repo} = 'https://github.com/ivsg-psu/PathPlanning_PathTools_PathClassLibrary';
@@ -121,7 +83,7 @@ dependencySubfolders{ith_repo} = {'Functions','Data'};
 
 
 %% Do we need to set up the work space?
-if ~exist('flag_Laps_Folders_Initialized','var')
+if ~exist('flag_Greedy_Folders_Initialized','var')
     
     % Clear prior global variable flags
     clear global FLAG_*
@@ -143,15 +105,19 @@ if ~exist('flag_Laps_Folders_Initialized','var')
         'Functions','Data'};
     fcn_DebugTools_addSubdirectoriesToPath(pwd,this_project_folders)
 
-    flag_Laps_Folders_Initialized = 1;
+    flag_Greedy_Folders_Initialized = 1;
 end
 
 %%% END OF STANDARD INSTALLER CODE %%%%%%%%%
 
+%%
+folderToDoReplacement = pwd;
+fcn_DebugTools_replaceStringInDirectory(folderToDoReplacement, cat(2,'_L','APS_'), '_GREEDY_', ('Greedy'), (-1));
+
 %% Set environment flags for input checking in Laps library
 % These are values to set if we want to check inputs or do debugging
-setenv('MATLABFLAG_LAPS_FLAG_CHECK_INPUTS','1');
-setenv('MATLABFLAG_LAPS_FLAG_DO_DEBUG','0');
+setenv('MATLABFLAG_GREEDY_FLAG_CHECK_INPUTS','1');
+setenv('MATLABFLAG_GREEDY_FLAG_DO_DEBUG','0');
 
 %% Set environment flags that define the ENU origin
 % This sets the "center" of the ENU coordinate system for all plotting

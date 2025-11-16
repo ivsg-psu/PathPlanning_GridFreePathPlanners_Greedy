@@ -17,6 +17,8 @@
 % 2025_11_12 by Sean Brennan
 % -- Cleaned up variable naming for clarity
 % -- Functionalized fcn_INTERNAL_flagFiles
+% 2025_11_13 by Sean Brennan
+% -- Minor bug fix where filepath was not defined before first usage
 
 
 % clearvars; 
@@ -24,23 +26,24 @@ close all;
 clc;
 
 % repoShortName = '_MapGen_';
-repoShortName = '_Laps_';
+repoShortName = '_Greedy_';
 
 outputFile = cat(2,'script_test_fcn',repoShortName,'all_stdout.txt');
 diary(fullfile(pwd,outputFile));
 
 %% Root folder checks start here
+
+st = dbstack; 
+thisFile = which(st(1).file);
+[filepath,name,ext] = fileparts(thisFile);
+rootFilePath = extractBefore(filepath,'Functions');
+
 fcn_DebugTools_cprintf('*blue','Checking root folder:\n\t%s:\n', filepath);
 
 
 %% Make sure there is only one .m file in main folder
 fcn_DebugTools_cprintf('*blue','');
 fcn_DebugTools_cprintf('*blue','\tChecking that there is 1 m-file in root folder: ');
-
-st = dbstack; 
-thisFile = which(st(1).file);
-[filepath,name,ext] = fileparts(thisFile);
-rootFilePath = extractBefore(filepath,'Functions');
 
 fileListRootFolder = dir(rootFilePath);
 [...

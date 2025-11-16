@@ -201,13 +201,6 @@ if (0==flag_max_speed) && (MAX_NARGIN == nargin)
     end
 end
 
-% Setup figures if there is debugging
-if flag_do_debug
-    fig_debug = 159; 
-else
-    fig_debug = []; %#ok<*NASGU>
-end
-
 %% Set the global variables - need this for input checking
 % Create a variable name for our flag. Stylistically, global variables are
 % usually all caps.
