@@ -111,21 +111,9 @@ polytopes = fcn_MapGen_polytopesSetCosts(polytopes, des_cost, (-1));
 visibilityMatrix = fcn_VGraph_clearAndBlockedPointsGlobal(polytopes, pointsWithData, pointsWithData, [], -1);
 
 % Plan path through field using greedy planner
-[cost, route] = fcn_Greedy_greedyPlanner(visibilityMatrix, pointsWithData(1:end-2,:), startPointData, finishPointData, (polytopes), (figNum));
+[cost, route] = fcn_Greedy_greedyPlanner(visibilityMatrix, pointsWithData, startPointData, finishPointData, (polytopes), (figNum));
 
-% axes_limits = [0 1 0 1]; % x and y axes limits
-% axis_style = 'square'; % plot axes style
-plotFormat.Color = 'Blue'; % edge line plotting
-plotFormat.LineStyle = '-';
-plotFormat.LineWidth = 2; % linewidth of the edge
-fillFormat = [1 0 0 1 0.4];
-% FORMAT: fcn_MapGen_plotPolytopes(polytopes,figNum,line_spec,line_width,axes_limits,axis_style);
-fcn_MapGen_plotPolytopes(polytopes,(plotFormat),(fillFormat),(figNum));
-hold on
-box on
-% axis([-0.1 1.1 -0.1 1.1]);
-xlabel('x [m]');
-ylabel('y [m]');
+
 
 plot(route(:,1),route(:,2),'.-','Color',[1 0 0],'LineWidth',3,'MarkerSize',20);
 
