@@ -150,7 +150,7 @@ setenv('MATLABFLAG_PLOTROAD_ALIGNMATLABLLAPLOTTINGIMAGES_LON','0.0000054');
 % See: http://patorjk.com/software/taag/#p=display&f=Big&t=Start%20of%20Demo%20Code
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-disp('Welcome to the demo code for the Laps library!')
+disp('Welcome to the demo code for the Greedy library!')
 
 %% Using Zone Definitions to Define Start, End, and Excursion Locations
 % To define the start, end, and excursion locations for data, the data must

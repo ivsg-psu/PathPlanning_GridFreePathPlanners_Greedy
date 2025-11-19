@@ -29,7 +29,9 @@
 % As: script_test_fcn_Greedy_greedyPlanner
 % 2025_11_14 - S. Brennan
 % - Moved script into the Greedy repo
-
+%
+% 2025_11_17 - S. Brennan
+% - Moved script into the Greedy repo
 
 %% Set up the workspace
 close all
@@ -66,7 +68,7 @@ rep = 1;
 final_info(repetitions) = struct('polytopes',[],'start',[],'finish',[],'path_x',[],'path_y',[],'appex1_x',[],'appex1_y',[],'appex2_x',[],'appex2_y',[]);
 
 % generate Voronoi tiling from Halton points
-pt_density = 100; % point density used for generation
+pt_density = 80; % point density used for generation. This is the number of polytopes
 low_pts = 1:pt_density:(pt_density*(repetitions-1)+1); % lower bound of Halton set range
 high_pts = pt_density:pt_density:pt_density*repetitions; % upper bound of Halton set range
 % remove the edge polytope that extend past the high and low points
@@ -108,13 +110,23 @@ polytopes = fcn_MapGen_polytopesSetCosts(polytopes, des_cost, (-1));
 % finishes = [all_pts; start; finish];
 % starts = [all_pts; start; finish];
 
-visibilityMatrix = fcn_VGraph_clearAndBlockedPointsGlobal(polytopes, pointsWithData, pointsWithData, [], -1);
+% Fill in vGraph
+vGraph = fcn_VGraph_clearAndBlockedPointsGlobal(polytopes, pointsWithData, pointsWithData, [], -1);
+
+% Plan path through field using OLD greedy planner
+[cost, route] = fcn_Greedy_greedyPlanner_OLD(vGraph, pointsWithData, startPointData, finishPointData, (polytopes), (figNum*100));
+
+%%
+% Fill in cGraph
+cGraph_heuristic = fcn_VGraph_costCalculate(vGraph, pointsWithData, 'distance from finish', (-1));
+cGraph_movement  = fcn_VGraph_costCalculate(vGraph, pointsWithData, 'movement distance', (-1));
+cGraph = cGraph_movement + cGraph_heuristic;
 
 % Plan path through field using greedy planner
-[cost, route] = fcn_Greedy_greedyPlanner(visibilityMatrix, pointsWithData, startPointData, finishPointData, (polytopes), (figNum));
+[cost, route] = fcn_Greedy_greedyPlanner(cGraph, pointsWithData, (figNum));
 
 
-
+%%
 plot(route(:,1),route(:,2),'.-','Color',[1 0 0],'LineWidth',3,'MarkerSize',20);
 
 
