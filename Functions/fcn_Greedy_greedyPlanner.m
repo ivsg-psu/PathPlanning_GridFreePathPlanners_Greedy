@@ -59,37 +59,43 @@ function [cost, route] = fcn_Greedy_greedyPlanner(cGraph, pointsWithData, vararg
 % Questions or comments? contact sjharnett@psu.edu
 
 
-% Revision history:
+% REVISION HISTORY:
+%
 % As: fcn_algorithm_greedy_planner
+%
 % January 2024 by Steve Harnett
-% -- first write of function
+% - First write of function
+%
 % February 2024 by Steve Harnett
-% -- function updated to make a right left distinction using cross products
+% - Function updated to make a right left distinction using cross products
 %
 % As: fcn_BoundedAStar_greedyPlanner
+%
 % 2025_07_17 by K. Hayes, kxh1031@psu.edu
-% -- function copied to new script from
-%    fcn_algorithm_greedy_planner.m to follow library
-%    conventions
+% - Function copied to new script from
+%   % fcn_algorithm_greedy_planner.m to follow library
+%   % conventions
 %
 % 2025_08_06 - K. Hayes
-% -- updated fcn header and formatting
+% - Updated fcn header and formatting
 %
 % 2025_08_18 - K. Hayes
-% -- added debug plotting capabilities
+% - Added debug plotting capabilities
 %
 % As: fcn_Greedy_greedyPlanner
-% 2025_11_14 by S. Brennan, sbrennan@psu.edu
-% - copied code into Greedy repo and changed name
+%
+% 2025_11_14 by Sean Brennan, sbrennan@psu.edu
+% - Copied code into Greedy repo and changed name
 %   % * From: fcn_BoundedAStar_greedyPlanner
 %   % * To: fcn_Greedy_greedyPlanner
 %
-% 2025_11_16 to 2025_11_19 by S. Brennan, sbrennan@psu.edu
-% - complete rewrite for clarity
+% 2025_11_16 to 2025_11_19 by Sean Brennan, sbrennan@psu.edu
+% - Complete rewrite for clarity
 
 
-% TO-DO:
-% -- fill in to-do items here.
+% TO-DO
+% 2025_11_21 by Sean Brennan, sbrennan@psu.edu
+% -  (add to do here)
 
 %% Debugging and Input checks
 % Check if flag_max_speed set. This occurs if the figNum variable input
@@ -105,22 +111,22 @@ else
     % Check to see if we are externally setting debug mode to be "on"
     flag_do_debug = 0; %     % Flag to plot the results for debugging
     flag_check_inputs = 1; % Flag to perform input checking
-    MATLABFLAG_MAPGEN_FLAG_CHECK_INPUTS = getenv("MATLABFLAG_MAPGEN_FLAG_CHECK_INPUTS");
-    MATLABFLAG_MAPGEN_FLAG_DO_DEBUG = getenv("MATLABFLAG_MAPGEN_FLAG_DO_DEBUG");
-    if ~isempty(MATLABFLAG_MAPGEN_FLAG_CHECK_INPUTS) && ~isempty(MATLABFLAG_MAPGEN_FLAG_DO_DEBUG)
-        flag_do_debug = str2double(MATLABFLAG_MAPGEN_FLAG_DO_DEBUG);
-        flag_check_inputs  = str2double(MATLABFLAG_MAPGEN_FLAG_CHECK_INPUTS);
+    MATLABFLAG_GREEDY_FLAG_CHECK_INPUTS = getenv("MATLABFLAG_GREEDY_FLAG_CHECK_INPUTS");
+    MATLABFLAG_GREEDY_FLAG_DO_DEBUG = getenv("MATLABFLAG_GREEDY_FLAG_DO_DEBUG");
+    if ~isempty(MATLABFLAG_GREEDY_FLAG_CHECK_INPUTS) && ~isempty(MATLABFLAG_GREEDY_FLAG_DO_DEBUG)
+        flag_do_debug = str2double(MATLABFLAG_GREEDY_FLAG_DO_DEBUG);
+        flag_check_inputs  = str2double(MATLABFLAG_GREEDY_FLAG_CHECK_INPUTS);
     end
 end
 
-flag_do_debug = 1;
+% flag_do_debug = 1;
 
 if flag_do_debug
     st = dbstack; %#ok<*UNRCH>
     fprintf(1,'STARTING function: %s, in file: %s\n',st(1).name,st(1).file);
-    debug_figNum = 999978; 
+    debug_figNum = 999978;
 else
-    debug_figNum = []; 
+    debug_figNum = [];
 end
 
 %% check input arguments?
@@ -207,10 +213,10 @@ if flag_do_debug
     xlabel('x [m]');
     ylabel('y [m]');
 
-    h_openSet    = plot(nan, nan,'r.','MarkerSize',30,'DisplayName','Query point');
-    h_q          = plot(nan, nan,'go','MarkerSize',10,'DisplayName','Current q');
-    h_allPoints  = plot(pointsWithData(:,1), pointsWithData(:,2),'.','MarkerSize',10,'Color',0.8*[1 1 1], 'DisplayName','All points');
-    h_successors = plot(nan, nan,'b.','MarkerSize',30,'DisplayName','Successors to open set');
+    h_openSet    = plot(nan, nan,'r.','MarkerSize',30,'DisplayName','Open set');
+    h_qHistory   = plot(nan, nan,'g-','MarkerSize',10,'LineWidth', 3, 'DisplayName','Current q');
+    h_allPoints  = plot(pointsWithData(:,1), pointsWithData(:,2),'.','MarkerSize',10,'Color',0.8*[1 1 1], 'DisplayName','All points'); %#ok<NASGU>
+    h_successors = plot(nan, nan,'b-','MarkerSize',30,'DisplayName','Successors to open set');
     legend('Interpreter','none','Location','best');
 
     % label point ids for debugging. The last two points are start and
@@ -244,11 +250,6 @@ openSet(startPointIndex) = startPointIndex; % only store the ID not the whole po
 openSetCosts = inf(numNodes,1);
 openSetCosts(startPointIndex,1) = 0; % Force the search to start at startPointIndex
 
-% 2.  Initialize the closed list. This is the list of all the points
-% already evaluated. This is updated AFTER the connections for the current
-% open set index have been exhausted.
-closed_set = nan(1,numNodes);
-
 % Initialize route outputs
 route = [];
 qHistory = nan(numNodes,5);
@@ -266,7 +267,7 @@ for ith_depth = 1:numNodes
     openHistory{ith_depth,1} = openIndices;
 
 
-    % Update the plot
+    % Update the plot of the openSet
     if flag_do_debug
         figure(debug_figNum);
         set(h_openSet,'Xdata',pointsWithData(openIndices,1),'Ydata',pointsWithData(openIndices,2));
@@ -280,18 +281,24 @@ for ith_depth = 1:numNodes
     [~, idx_of_q] = min(openSetCosts);
 
     qWithData = pointsWithData(idx_of_q,:);
+    qHistory(ith_depth,:) = qWithData;
 
     % Update the plot
     if flag_do_debug
         figure(debug_figNum);
-        set(h_q,'Xdata',pointsWithData(idx_of_q,1),'Ydata',pointsWithData(idx_of_q,2));
+        set(h_qHistory,'Xdata',qHistory(:,1),'Ydata',qHistory(:,2));
     end
 
-    qHistory(ith_depth,:) = qWithData;
+
 
     %%%%%%%%%%%%%%%
     % b) pop q off the open list by setting cost to go to q to infinity
     openSet(idx_of_q) = NaN;
+
+    % Set the openSetCosts for this query node, q, to inf so it's not
+    % called again.
+    openSetCosts(idx_of_q,1) = inf;
+
     % Set costs for those that were explored to infinity. These are the
     % "to" costs, so that no future searches will choose to return to
     % indices already visited
@@ -306,14 +313,16 @@ for ith_depth = 1:numNodes
 
     % The cost for the current open set selection are the "rows" of the cost
     % matrix. These represent the costs to leave all visited nodes
-    nextConnectionCosts = cGraphModified(openIndices,:); 
+    % USE THIS FOR DJKSTRAS --> nextConnectionCosts = cGraphModified(openIndices,:);
+    nextConnectionCosts = cGraphModified(idx_of_q,:);
 
     % Keep only those that are not infinite
     indicesToSearch = find(~isinf(nextConnectionCosts));
-    [fromIndex, toIndex] = find(~isinf(nextConnectionCosts)); 
-    actualFromIndex = openIndices(fromIndex);
+    [~, toIndex] = find(~isinf(nextConnectionCosts));
+    % USE THIS FOR DJKSTRAS --> actualFromIndex = openIndices(fromIndex);
+    actualFromIndex = ones(length(toIndex),1)*idx_of_q;
 
-    openParents{ith_depth,1} = [actualFromIndex, toIndex];
+    openParents{ith_depth,1} = [actualFromIndex, toIndex'];
 
     % Update the openSet info
     openSet(indicesToSearch) = indicesToSearch;
@@ -322,7 +331,12 @@ for ith_depth = 1:numNodes
     % Update the plot
     if flag_do_debug
         figure(debug_figNum);
-        set(h_successors,'Xdata',pointsWithData(indicesToSearch,1),'Ydata',pointsWithData(indicesToSearch,2));
+        dataToPlot = nan(length(indicesToSearch)*3,2);
+        for ith_plot = 1:length(indicesToSearch)
+            rowsToFill = (ith_plot-1)*3;
+            dataToPlot(rowsToFill+1:rowsToFill+3,:) = [pointsWithData(idx_of_q,1:2); pointsWithData(indicesToSearch(ith_plot),1:2); nan(1,2)];
+        end
+        set(h_successors,'Xdata',dataToPlot(:,1),'Ydata',dataToPlot(:,2));
     end
 
 
@@ -334,60 +348,46 @@ for ith_depth = 1:numNodes
     end
     if any(openSet==finishPointIndex)
         flagFinishWasFound = 1;
+        break;
     end
 end % Ends while loop
 
+cost = [];
 if flagFinishWasFound
-    disp('Found finish');
+
+    qWithData = pointsWithData(finishPointIndex,:);
+    qHistory(ith_depth+1,:) = qWithData;
+
+    % Update the plot
+    if flag_do_debug
+        figure(debug_figNum);
+        set(h_qHistory,'Xdata',qHistory(:,1),'Ydata',qHistory(:,2));
+    end
+
+    % Trace steps backwards to start point
+    lastQ = finishPointIndex;
+    Nlinks = ith_depth;
+    backwardsRouteIndex = lastQ;
+    for ith_back = Nlinks:-1:1
+        routeIndex(ith_back,1) = lastQ;
+        thisParentSet = openParents{ith_back};
+        sourceIndex = find(thisParentSet(:,2)==lastQ, 1);
+        if ~isempty(sourceIndex)
+            lastQ = thisParentSet(sourceIndex,1);
+            backwardsRouteIndex = [backwardsRouteIndex; lastQ]; %#ok<AGROW>
+        end
+    end
+    routeIndex = flipud(backwardsRouteIndex);
+    route = pointsWithData(routeIndex,1:2);
+
+    % Calculate route length by finding the delta change in XY, then doing
+    % sum of distances
+    deltaRoute = diff(route,1,1);
+    deltaDistances = sum(deltaRoute.^2,2).^0.5;
+    cost = sum(deltaDistances);
+
 end
-%
-%
-% % d) for each successor
-% for i = 1:length(successorIndices)
-%     successor = pointsWithData(successorIndices(i),:);
-%
-%     % i) if successor is the goal, stop search
-%     if successor(3) == finishPointData(3)
-%         % Could move this out of the for-loop to post-calculate
-%         %%%%%%%%
-%         cost = open_set_gs(idx_of_q) + heuristicCost(idx_of_q);
-%         parent = idx_of_q;
-%         route = [qWithData; finishPointData];
-%         qHistory(end,:) = [];
-%         possible_parents = intersect(openParents{end}, qHistory(:,3));
-%
-%         while parent ~= startPointData(3)
-%             parent_gs = open_set_gs(possible_parents);
-%             [~, idx_of_parent] = min(parent_gs);
-%             parent = possible_parents(idx_of_parent);
-%             parent_position_in_history = find(parent == qHistory(:,3));
-%             parent_point = qHistory(parent_position_in_history,:);
-%             route = [parent_point;route]; %#ok<AGROW>
-%             qHistory(parent_position_in_history:end,:) = [];
-%             % parent = possible_parents(idx_of_parent);
-%             % parent_position_in_history = find(parent == q_history(:,3));
-%             possible_parents = intersect(openParents{parent_position_in_history}, qHistory(:,3));
-%         end
-%         route = [startPointData; route]; %#ok<AGROW>
-%         %%%%%%%%
-%         break
-%
-%     else
-%         % ii) else, compute both g and h for successor
-%         successor_g = open_set_gs(idx_of_q) + sqrt((successor(1) - qWithData(1)).^2 + ((successor(2) - qWithData(2)).^2));
-%         successor_h = sqrt((successor(1) - finishPointData(1)).^2 + ((successor(2) - finishPointData(2)).^2));
-%         successor_f = successor_g + successor_h;
-%         openSet(successor(3)) = successor(3);
-%         open_set_gs(successor(3)) = successor_g;
-%         nextConnectionCosts(successor(3)) = successor_f;
-%
-%     end
-%
-%
-%     % e) push q on the closed list
-%     closed_set(idx_of_q) = idx_of_q;
-%
-% end
+
 %% Plot the results (for debugging)?
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %   _____       _
@@ -404,19 +404,29 @@ if flag_do_plots
     figure(figNum)
     hold on
 
+    legend('Interpreter','none','Location','best');
+    box on
+
+    xlabel('x [m]');
+    ylabel('y [m]');
+
     % Plot polytopes
     plotFormat.Color = 'blue';
     plotFormat.LineWidth = 2;
+
+    % Call the function
+    polytopes = fcn_VGraph_helperFillPolytopesFromPointData(pointsWithData, (-1));
+
     h = fcn_MapGen_plotPolytopes(polytopes,plotFormat,[1 0 0 0 0.5],figNum);
     set(h, 'HandleVisibility', 'off');
 
     % Plot path through field
-    plot(route(:,1),route(:,2),'k-','linewidth',2, 'DisplayName', 'Route')
     plot(startPointData(1), startPointData(2), 'gx','linewidth',2, 'DisplayName', 'Start')
     plot(finishPointData(1), finishPointData(2), 'rx','linewidth',2, 'DisplayName', 'Finish')
 
-    % Plot neighboring points
-    % plot(appex_x,appex_y,'o','linewidth',2)
+    % Plot the results
+    plot(route(:,1),route(:,2),'.-','Color', [0 0 1], 'MarkerSize', 30, 'LineWidth', 3, 'DisplayName', 'Route');
+
 
 end
 

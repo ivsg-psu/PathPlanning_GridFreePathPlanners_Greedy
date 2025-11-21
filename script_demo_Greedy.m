@@ -14,16 +14,20 @@
 % The purpose of the code is to demonstrate an implementation of the Greedy
 % path planner
 
-% Revision history:
-% 2025_11_15 - Sean Brennan
-% -  created this demo script of core functions
+% REVISION HISTORY:
+% 
+% 2025_11_15 by Sean Brennan, sbrennan@psu.edu
+% - Created this demo script of core functions
+% 
+% 2025_11_21 by Sean Brennan, sbrennan@psu.edu
+% - Updating rev lists
+% - confirmed greedyPlanner works at basic level
+% (new release)
 
 % TO-DO:
-% -  2025_11_12 by Sean Brennan, sbrennan@psu.edu
-%    % * Main code runs, but could use some better outputs to workspace via
-%    %   % fprintf.
-%    % * Not the greatest money plot outputs in main script - these could
-%    %   % be more clear.
+% 
+% 2025_11_21 by Sean Brennan, sbrennan@psu.edu
+% -  (add to do here)
 
 
 %% Make sure we are running out of root directory
@@ -77,7 +81,7 @@ dependencySubfolders{ith_repo} = {'Functions','Data'};
 % dependencySubfolders{ith_repo} = {'Functions','Data'};
 
 % ith_repo = ith_repo+1;
-% dependencyURLs{ith_repo} = 'https://github.com/ivsg-psu/PathPlanning_MapTools_MapGenClassLibrary';
+% dependencyURLs{ith_repo} = 'https://github.com/ivsg-psu/PathPlanning_MapT ools_MapGenClassLibrary';
 % dependencySubfolders{ith_repo} = {'Functions','testFixtures','GridMapGen'};
 
 
@@ -190,8 +194,8 @@ path_examples{2} = [1*ones_full_steps full_steps];
 % "plotLapsXY" subfunction
 
 % Plot the results via fcn_Laps_plotLapsXY
-fig_num = 222;
-fcn_Laps_plotLapsXY(path_examples,fig_num);
+figNum = 222;
+fcn_Laps_plotLapsXY(path_examples,figNum);
 
 %%
 % Now, use a zone plotting tool to show the point and line-segment types of
@@ -199,31 +203,31 @@ fcn_Laps_plotLapsXY(path_examples,fig_num);
 % definition is shown in blue. The segment definition includes an arrow
 % that points in the direction of an allowable crossing.
 
-fig_num = 444;
+figNum = 444;
 
 zone_center = [0.8 0];
 zone_radius = 2;
 num_points = 3;
 point_zone_definition = [zone_radius num_points zone_center];
-fcn_Laps_plotPointZoneDefinition(point_zone_definition,'g',fig_num);
+fcn_Laps_plotPointZoneDefinition(point_zone_definition,'g',figNum);
 
 segment_zone_definition = [0.8 0; 1.2 0];
-fcn_Laps_plotSegmentZoneDefinition(segment_zone_definition,'b',fig_num);
+fcn_Laps_plotSegmentZoneDefinition(segment_zone_definition,'b',figNum);
 
 
 %%
 % Show we can get the same plot now via a combined function
 
-fig_num = 4443;
-fcn_Laps_plotZoneDefinition(point_zone_definition,'g',fig_num);
-fcn_Laps_plotZoneDefinition(segment_zone_definition,'b',fig_num);
+figNum = 4443;
+fcn_Laps_plotZoneDefinition(point_zone_definition,'g',figNum);
+fcn_Laps_plotZoneDefinition(segment_zone_definition,'b',figNum);
 
 %% Point zone evaluations
 % The function, fcn_Laps_findPointZoneStartStopAndMinimum, uses a point
 % zone evaluation to determine portions of a segment that are within a
 % point zone definition. For example, if the path does not cross into the
 % zone, nothing is returned:
-fig_num = 1;
+figNum = 1;
 
 query_path = ...
     [full_steps 0.4*ones_full_steps];
@@ -236,7 +240,7 @@ zone_radius = 0.2; % with radius 0.2
     zone_center,...
     zone_radius,...
     [],...
-    fig_num);
+    figNum);
 
 assert(isempty(zone_start_indices));
 assert(isempty(zone_end_indices));
@@ -246,7 +250,7 @@ assert(isempty(zone_min_indices));
 % And, the default is that three points must be within the zone. So, if a
 % path only crosses one or two points, then nothing is returned.
 
-fig_num = 2;
+figNum = 2;
 
 query_path = ...
     [full_steps 0.2*ones_full_steps];
@@ -259,7 +263,7 @@ zone_radius = 0.2; % with radius 0.2
     zone_center,...
     zone_radius,...
     [],...
-    fig_num);
+    figNum);
 
 assert(isempty(zone_start_indices));
 assert(isempty(zone_end_indices));
@@ -278,7 +282,7 @@ zone_radius = 0.23; % with radius 0.23
     zone_center,...
     zone_radius,...
     [],...
-    fig_num);
+    figNum);
 
 assert(isempty(zone_start_indices));
 assert(isempty(zone_end_indices));
@@ -288,7 +292,7 @@ assert(isempty(zone_min_indices));
 %%
 % But, if a path crosses the zone with at least three points, then the
 % indices of the start, end, and minimum of the path are returned.
-fig_num = 3;
+figNum = 3;
 
 query_path = ...
     [half_steps zero_half_steps];
@@ -301,7 +305,7 @@ zone_radius = 0.2; % with radius 0.2
     zone_center,...
     zone_radius,...
     [],...
-    fig_num);
+    figNum);
 
 assert(isequal(zone_start_indices,9));
 assert(isequal(zone_end_indices,11));
@@ -318,7 +322,7 @@ zero_half_steps = 0*half_steps;
 ones_half_steps = ones(length(half_steps(:,1)),1);
 
 minimum_number_of_indices_in_zone = 3;
-fig_num = 5;
+figNum = 5;
 
 
 query_path = ...
@@ -332,7 +336,7 @@ zone_radius = 0.23;
     zone_center,...
     zone_radius,...
     minimum_number_of_indices_in_zone,...
-    fig_num);
+    figNum);
 
 assert(isequal(zone_start_indices,[10; 30]));
 assert(isequal(zone_end_indices,  [13; 33]));
@@ -349,24 +353,24 @@ laps_array = fcn_Laps_fillSampleLaps;
 
 
 % Plot all the laps one at a time
-fig_num = 22323;
+figNum = 22323;
 for ith_example = 1:length(laps_array)
     single_lap = laps_array{ith_example};
-    fcn_Laps_plotLapsXY({single_lap},fig_num);
+    fcn_Laps_plotLapsXY({single_lap},figNum);
 end
 
 % Plot all the laps at once
-fig_num = 22324;
-fcn_Laps_plotLapsXY(laps_array,fig_num);
+figNum = 22324;
+fcn_Laps_plotLapsXY(laps_array,figNum);
 
 %% Show fcn_Laps_plotZoneDefinition.m
 % Plots the zone, allowing user-defined colors. For example, the figure
 % below shows a radial zone for the start, and a line segment for the end.
 start_definition = [10 3 0 0]; % Radius 10, 3 points must pass near [0 0]
-fcn_Laps_plotZoneDefinition(start_definition,'g',fig_num);
+fcn_Laps_plotZoneDefinition(start_definition,'g',figNum);
 
 end_definition = [40 -40; 80 -40]; % must cross a line segment starting at [40 -40], ending at [80 -40]
-fcn_Laps_plotZoneDefinition(end_definition,'r',fig_num);
+fcn_Laps_plotZoneDefinition(end_definition,'r',figNum);
 
 %% Call the fcn_Laps_breakDataIntoLaps function, plot in figure 2
 % Test of fcn_Laps_breakDataIntoLaps.m : This is the core function for this
@@ -377,23 +381,23 @@ start_definition = [10 3 0 0]; % Radius 10, 3 points must pass near [0 0]
 end_definition = [30 3 0 -60]; % Radius 30, 3 points must pass near [0,-60]
 
 excursion_definition = []; % empty
-fig_num = 2;
+figNum = 2;
 lap_traversals = fcn_Laps_breakDataIntoLaps(...
     laps_array{1},...
     start_definition,...
     end_definition,...
     excursion_definition,...
-    fig_num);
+    figNum);
 
 % Do we get 3 laps?
 assert(isequal(3,length(lap_traversals)));
 
 
 %% Show the use of segment definition
-fig_num = 10004;
+figNum = 10004;
 titleString = sprintf('DEMO case: Show the use of segment definition');
-fprintf(1,'Figure %.0f: %s\n',fig_num, titleString);
-figure(fig_num); clf;
+fprintf(1,'Figure %.0f: %s\n',figNum, titleString);
+figure(figNum); clf;
 
 dataSetNumber = 9;
 
@@ -412,7 +416,7 @@ excursion_definition = []; % empty
     start_definition,...
     end_definition,...
     excursion_definition,...
-    fig_num);
+    figNum);
 
 
 % Check variable types
@@ -429,7 +433,7 @@ assert(isequal(97,length(lap_cellArrayOfPaths{2}(:,1))));
 assert(isequal(78,length(lap_cellArrayOfPaths{3}(:,1))));
 
 % Make sure plot opened up
-assert(isequal(get(gcf,'Number'),fig_num));
+assert(isequal(get(gcf,'Number'),figNum));
 
 %% Functions follow
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

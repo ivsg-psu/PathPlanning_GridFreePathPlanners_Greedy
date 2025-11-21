@@ -73,7 +73,7 @@ function fcn_DebugTools_autoInstallRepos(...
 %
 % OUTPUTS:
 %
-%      (none)
+%      (none into workspace - installs files into Utilities subfolder)
 %
 % DEPENDENCIES:
 %
@@ -84,6 +84,9 @@ function fcn_DebugTools_autoInstallRepos(...
 %      DebugTools library: fcn_DebugTools_addSubdirectoriesToPath
 %
 % EXAMPLES:
+%      See: script_test_fcn_DebugTools_autoInstallRepos
+% 
+% (another example)
 %
 % % Define the name of subfolder to be created in "Utilities" subfolder
 % dependency_name = 'DebugTools_v2023_01_18';
@@ -105,16 +108,25 @@ function fcn_DebugTools_autoInstallRepos(...
 % This function was written on 2023_01_23 by S. Brennan
 % Questions or comments? sbrennan@psu.edu
 
-% Revision history:
-% 2025_11_10 - S. Brennan, sbrennan@psu.edu
-% -- wrote the code originally
-% 2025_11_16 - S. Brennan, sbrennan@psu.edu
-% -- Improved error handling. Made warnings verbose for EVERY error call.
+% REVISION HISTORY:
+% 
+% 2025_11_10 by Sean Brennan, sbrennan@psu.edu
+% - wrote the code originally
+% 
+% 2025_11_16 by Sean Brennan, sbrennan@psu.edu
+% - Improved error handling. Made warnings verbose for EVERY error call.
+%
+% 2025_11_20 by Sean Brennan, sbrennan@psu.edu
+% - Formatted revision lists to Markdown format
+% - Fixed variable naming for clarity:
+%   % * fig_+num to figNum
+% - Updated docstrings to point to test script
 
-% TO DO
-% -- 2025_11_12 - S. Brennan
+
+% TO-DO:
+% - 2025_11_12 by Sean Brennan, sbrennan@psu.edu
 %    % * Add input checking
-% -- Would like to have the following functionality:
+% - Would like to have the following functionality:
 % During the install, the packages needed for each dependency are also
 % checked and added to the dependency list. Thus, if a dependency that is
 % listed contains unlisted dependencies, then the unlisted dependencies are
@@ -546,19 +558,28 @@ function fcn_INTERNAL_DebugTools_installDependencies(dependency_name, dependency
 % This function was written on 2023_01_23 by S. Brennan
 % Questions or comments? sbrennan@psu.edu
 
-% Revision history:
+% REVISION HISTORY:
+% 
 % 2025_11_11 by S. Brennan, sbrennan@psu.edu
-% -- wrote the code originally
+% - wrote the code originally
+% 
 % 2025_11_12 by S. Brennan, sbrennan@psu.edu
-% -- updated docstrings in header due to minor issues
-% -- updated header global flags
+% - updated docstrings in header due to minor issues
+% - updated header global flags
+%
+% 2025_11_20 by Sean Brennan, sbrennan@psu.edu
+% - Formatted revision lists to Markdown format
+% - cleaned up variable naming:
+%   % * fig_+num to figNum
 
-% TO DO
-% -- Add input argument checking
+% TO-DO:
+% 
+% 2025_11_20 by Sean Brennan, sbrennan@psu.edu
+% - Add input argument checking
 
 %% Debugging and Input checks
 
-% Check if flag_max_speed set. This occurs if the fig_num variable input
+% Check if flag_max_speed set. This occurs if the figNum variable input
 % argument (varargin) is given a number of -1, which is not a valid figure
 % number.
 MAX_NARGIN = 4; % The largest Number of argument inputs to the function
@@ -584,9 +605,9 @@ end
 if flag_do_debug
     st = dbstack; %#ok<*UNRCH>
     fprintf(1,'STARTING function: %s, in file: %s\n',st(1).name,st(1).file);
-    debug_fig_num = 3443534;
+    debug_figNum = 3443534;
 else
-    debug_fig_num = [];
+    debug_figNum = [];
 end
 %% check input arguments
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -616,12 +637,12 @@ if 0 == flag_max_speed
     end
 end
 
-% Check to see if user specifies fig_num?
+% Check to see if user specifies figNum?
 flag_do_plots = 0; % Default is to NOT show plots
 if (0==flag_max_speed) && (MAX_NARGIN == nargin) 
     temp = varargin{end};
     if ~isempty(temp)
-        fig_num = temp;
+        figNum = temp;
         flag_do_plots = 1;
     end
 end

@@ -4,7 +4,7 @@ function [cost, route] = fcn_Greedy_greedyPlanner(visibilityMatrix, pointsWithDa
 % uses 'greedy' planner methods to plan a path through an environement
 %
 % FORMAT:
-% [cost, route] = fcn_Greedy_greedyPlanner(visibilityMatrix, pointsWithData, startPointData, finishPointData, (polytopes), (fig_num))
+% [cost, route] = fcn_Greedy_greedyPlanner(visibilityMatrix, pointsWithData, startPointData, finishPointData, (polytopes), (figNum))
 %
 %
 % INPUTS:
@@ -41,7 +41,7 @@ function [cost, route] = fcn_Greedy_greedyPlanner(visibilityMatrix, pointsWithDa
 %       area: area of the polytope
 %       max_radius: distance from the mean to the furthest vertex
 %
-%   fig_num: a figure number to plot results. If set to -1, skips any
+%   figNum: a figure number to plot results. If set to -1, skips any
 %   input checking or debugging, no figures will be generated, and sets
 %   up code to maximize speed. As well, if given, this forces the
 %   variable types to be displayed as output and as well makes the input
@@ -66,38 +66,44 @@ function [cost, route] = fcn_Greedy_greedyPlanner(visibilityMatrix, pointsWithDa
 %
 % This function was written in January 2024 by Steve Harnett
 % Questions or comments? contact sjharnett@psu.edu
+
+% REVISION HISTORY:
 %
-% Revision history:
 % As: fcn_algorithm_greedy_planner
+% 
 % January 2024 by Steve Harnett
-% -- first write of function
+% - First write of function
+% 
 % February 2024 by Steve Harnett
-% -- function updated to make a right left distinction using cross products
+% - Function updated to make a right left distinction using cross products
 %
 % As: fcn_BoundedAStar_greedyPlanner
+% 
 % 2025_07_17 by K. Hayes, kxh1031@psu.edu
-% -- function copied to new script from
-%    fcn_algorithm_greedy_planner.m to follow library
-%    conventions
+% - Function copied to new script from
+%   % fcn_algorithm_greedy_planner.m to follow library
+%   % conventions
 %
 % 2025_08_06 - K. Hayes
-% -- updated fcn header and formatting
+% - Updated fcn header and formatting
 %
 % 2025_08_18 - K. Hayes
-% -- added debug plotting capabilities
+% - Added debug plotting capabilities
 %
 % As: fcn_Greedy_greedyPlanner
-% 2025_11_14 by S. Brennan, sbrennan@psu.edu
-% - copied code into Greedy repo and changed name
+% 
+% 2025_11_14 by Sean Brennan, sbrennan@psu.edu
+% - Copied code into Greedy repo and changed name
 %   % * From: fcn_BoundedAStar_greedyPlanner
 %   % * To: fcn_Greedy_greedyPlanner
 
 
-% TO-DO:
-% -- fill in to-do items here.
+% TO-DO
+% 2025_11_21 by Sean Brennan, sbrennan@psu.edu
+% -  (add to do here)
 
 %% Debugging and Input checks
-% Check if flag_max_speed set. This occurs if the fig_num variable input
+% Check if flag_max_speed set. This occurs if the figNum variable input
 % argument (varargin) is given a number of -1, which is not a valid figure
 % number.
 MAX_NARGIN = 6; % The largest Number of argument inputs to the function
@@ -123,9 +129,9 @@ end
 if flag_do_debug
     st = dbstack; %#ok<*UNRCH>
     fprintf(1,'STARTING function: %s, in file: %s\n',st(1).name,st(1).file);
-    debug_fig_num = 999978; 
+    debug_figNum = 999978; 
 else
-    debug_fig_num = []; 
+    debug_figNum = []; 
 end
 
 %% check input arguments?
@@ -175,7 +181,7 @@ flag_do_plots = 0; % Default is to NOT show plots
 if (0==flag_max_speed) && (MAX_NARGIN == nargin)
     temp = varargin{end};
     if ~isempty(temp) % Did the user NOT give an empty figure number?
-        fig_num = temp;
+        figNum = temp;
         flag_do_plots = 1;
     end
 end
@@ -195,7 +201,7 @@ end
 
 
 if flag_do_debug
-    figure(debug_fig_num);
+    figure(debug_figNum);
     clf;
     hold on;
 
@@ -367,13 +373,13 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 if flag_do_plots
-    figure(fig_num)
+    figure(figNum)
     hold on
 
     % Plot polytopes
     plotFormat.Color = 'blue';
     plotFormat.LineWidth = 2;
-    h = fcn_MapGen_plotPolytopes(polytopes,plotFormat,[1 0 0 0 0.5],fig_num);
+    h = fcn_MapGen_plotPolytopes(polytopes,plotFormat,[1 0 0 0 0.5],figNum);
     set(h, 'HandleVisibility', 'off');
 
     % Plot path through field
