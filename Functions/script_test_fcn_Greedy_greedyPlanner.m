@@ -35,10 +35,14 @@
 %
 % 2025_11_17 by Sean Brennan, sbrennan@psu.edu
 % - Moved script into the Greedy repo
+%
+% 2025_11_22 by Sean Brennan, sbrennan@psu.edu
+% - Added non-convex test case
 
 % TO-DO
 % 2025_11_21 by Sean Brennan, sbrennan@psu.edu
-% -  (add to do here)
+% -  Add calls to fcn_MapGen_loadTestMap to create testing conditions
+
 
 
 %% Set up the workspace
@@ -153,11 +157,68 @@ assert(isequal(get(gcf,'Number'),figNum));
 close all;
 fprintf(1,'Figure: 2XXXXXX: TEST mode cases\n');
 
-%% TEST case: zero gap between polytopes
+%% TEST case: non-convex simple polytope
 figNum = 20001;
-titleString = sprintf('TEST case: zero gap between polytopes');
+titleString = sprintf('TEST case: non-convex simple polytope');
 fprintf(1,'Figure %.0f: %s\n',figNum, titleString);
 figure(figNum); clf;
+
+clear polytopes
+polytopes(1).vertices = [0 0; -1 -2; 4 -1; 3 2.5; -1.5 1; 0 0];
+polytopes = fcn_MapGen_polytopesFillFieldsFromVertices(polytopes);
+goodAxis = [-3 7 -4 4];
+startXY = [-0.5 -0.5];
+finishXY = [6 -0.5];
+
+% Make sure all have same cost
+for ith_poly = 1:length(polytopes)
+    polytopes(ith_poly).cost = 0.4;
+end
+
+% info needed for further work
+% gather data on all the points
+[pointsWithData, startPointData, finishPointData] = fcn_VGraph_polytopesGenerateAllPtsTable(polytopes,startXY,finishXY,-1);
+
+% Generate visibility graph
+% finishes = [all_pts; start; finish];
+% starts = [all_pts; start; finish];
+
+% Fill in vGraph
+vGraph = fcn_VGraph_clearAndBlockedPointsGlobal(polytopes, pointsWithData, pointsWithData, [], -1);
+
+% NOTE: the old planner will hang with non-convex obstacles
+if 1==0
+    % Plan path through field using OLD greedy planner
+    [cost_OLD, route_OLD] = fcn_Greedy_greedyPlanner_OLD(vGraph, pointsWithData, startPointData, finishPointData, (polytopes), (figNum*100));
+end
+
+% Fill in cGraph
+cGraph_heuristic = fcn_VGraph_costCalculate(vGraph, pointsWithData, 'distance from finish', (-1));
+cGraph_movement  = fcn_VGraph_costCalculate(vGraph, pointsWithData, 'movement distance', (-1));
+cGraph = cGraph_movement + cGraph_heuristic;
+
+% Plan path through field using greedy planner
+[cost, route] = fcn_Greedy_greedyPlanner(cGraph, pointsWithData, (figNum));
+
+sgtitle(titleString, 'Interpreter','none');
+
+% Check variable types
+assert(isnumeric(cost));
+assert(isnumeric(route));
+
+% Check variable sizes
+assert(size(cost,1)==1); 
+assert(size(cost,2)==1); 
+assert(size(route,1)>=2); 
+assert(size(route,2)==2); 
+
+% Check variable values
+assert(isequal(route(1,:), startPointData(1,1:2)));
+assert(isequal(route(end,:), finishPointData(1,1:2)));
+
+% Make sure plot opened up
+assert(isequal(get(gcf,'Number'),figNum));
+
 
 %% Fast Mode Tests
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

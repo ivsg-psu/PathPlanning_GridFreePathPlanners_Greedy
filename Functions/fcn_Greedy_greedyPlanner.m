@@ -425,7 +425,7 @@ if flag_do_plots
     plot(finishPointData(1), finishPointData(2), 'rx','linewidth',2, 'DisplayName', 'Finish')
 
     % Plot the results
-    plot(route(:,1),route(:,2),'.-','Color', [0 0 1], 'MarkerSize', 30, 'LineWidth', 3, 'DisplayName', 'Route');
+    plot(route(:,1),route(:,2),'.-','Color', [1 0 1], 'MarkerSize', 30, 'LineWidth', 3, 'DisplayName', 'Route');
 
 
 end
